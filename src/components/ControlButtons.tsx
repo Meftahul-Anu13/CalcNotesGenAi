@@ -15,7 +15,7 @@ interface ToolbarProps {
           className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
         >
           Reset 
-          {/* here when reset button will be clikced the erase button will be in prev mode again */}
+         
         </button>
         <button
         onClick={onToggleEraser}

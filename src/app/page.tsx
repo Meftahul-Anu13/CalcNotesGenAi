@@ -1,8 +1,10 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import ColorPalette from "@/components/ColorPicker";
 import Toolbar from "@/components/ControlButtons";
 import "./globals.css";
+import axios from 'axios';
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -11,6 +13,7 @@ export default function Home() {
   const [color, setColor] = useState("white");
   const colors = ["white", "red", "blue", "green", "yellow"];
   const [isErasing, setIsErasing] = useState(false);
+  const [dictOfVars, setDictOfVars] = useState({});
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -95,8 +98,28 @@ export default function Home() {
     }
   };
 
-  const runAction = () => {
-    alert("Run action clicked!");
+  const runAction = async () => {
+    if (!canvasRef.current) return;
+
+    // Convert canvas content to Base64
+    const canvas = canvasRef.current;
+    if (canvas) {
+      
+        if (canvas) {
+          const response = await axios({
+              method: 'post',
+              url: `http://127.0.0.1:8000/api`,
+              data: {
+                  image: canvas.toDataURL('image/png'),
+                  dict_of_vars: dictOfVars
+              }
+          });
+          
+
+        const resp = await response.data;
+        console.log('Response:', resp);
+      } 
+    }
   };
 
   return (
