@@ -1,10 +1,15 @@
-import os
 import json
+import re
 from PIL import Image
+import wolframalpha
 import pytesseract
+import os
 import google.generativeai as genai
 from dotenv import load_dotenv
 import ast 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
 # Load environment variables
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -35,15 +40,37 @@ def analyze_image(img: Image, dict_of_vars: dict):
     )
     response = model.generate_content([prompt, img])
     print(response.text)
-    answers = []
+    answers = response.text
     try:
         answers = ast.literal_eval(response.text)
     except Exception as e:
         print(f"Error in parsing response from Gemini API: {e}")
-    print('returned answer ', answers)
-    for answer in answers:
-        if 'assign' in answer:
-            answer['assign'] = True
-        else:
-            answer['assign'] = False
+    print('returned answer ', answers)     
     return answers
+
+
+APP_ID = 'UJXPPY-378TH3L8AJ'
+
+def query_wolframalpha(query):
+    
+    client = wolframalpha.Client(APP_ID)
+    
+    res =  client.query(query)
+    
+    # pattern = r" \[{'expr': '.*?', 'result': -?\d+, 'assign': .*?}(?:, {'expr': '.*?', 'result': -?\d+, 'assign': .*?})*\] "
+    # print(res)
+    # answer = next(res.results).text
+    try:
+        # answer = next(res.results).text
+        # answer = query[0]
+        answer = next(res.results).text
+        print("answer" ,answer)
+        return answer
+    except StopIteration:
+        return "No results found."
+    
+    
+async def query_wolframalpha_async(query):
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as pool:
+        return await loop.run_in_executor(pool, query_wolframalpha, query)

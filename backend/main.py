@@ -9,18 +9,20 @@ import json
 import ast 
 import uvicorn
 from contextlib import asynccontextmanager
+import asyncio
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     yield
 
 SERVER_URL = '127.0.0.1' 
 PORT = 8000 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

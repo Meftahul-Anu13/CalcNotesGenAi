@@ -1,15 +1,14 @@
 "use client";
 import {  useState } from "react";
-import dynamic from "next/dynamic";
-import { MathJax } from "better-react-mathjax";
+// import dynamic from "next/dynamic";
+import { MathJax ,MathJaxContext} from "better-react-mathjax";
 interface ResultComponentsProps {
   latexExpressions: string[];
   onRun: () => void;
 }
 
-// Dynamically load the MathJax component
-// const MathJax = dynamic(() => import("better-react-mathjax"), { ssr: false });
-const MathJaxProvider = dynamic(() => import("better-react-mathjax").then((mod) => mod.MathJaxContext), { ssr: false });
+
+
 
 const ResultComponents = ({ latexExpressions, onRun }: ResultComponentsProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,18 +31,18 @@ const ResultComponents = ({ latexExpressions, onRun }: ResultComponentsProps) =>
       {isOpen && (
         <div
           className="fixed top-12 right-6 bg-white text-black rounded-lg 
-          shadow-lg w-80 max-h-[80vh] overflow-auto p-4 border border-gray-300 z-50"
+          shadow-lg w-80 max-h-[40vh] overflow-auto p-4 border border-gray-300 z-50"
         >
           <h2 className="text-lg font-semibold mb-2 text-center">Calculation Results</h2>
           <div className="space-y-4">
-            <MathJaxProvider>
+            <MathJaxContext>
               {latexExpressions.map((expression, index) => (
                 <div key={index} className="latex-result bg-gray-100 p-3 rounded shadow-md border border-gray-200">
                   
                   <MathJax inline>{`${expression}`}</MathJax>
                 </div>
               ))}
-            </MathJaxProvider>
+            </MathJaxContext>
           </div>
         </div>
       )}

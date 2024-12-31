@@ -110,8 +110,8 @@ export default function Home() {
 
   const runAction = async () => {
     if (!canvasRef.current) return;
-  
     const canvas = canvasRef.current;
+    setLatexExpressions([]); 
     try {
       const response = await axios.post("http://127.0.0.1:8000/api", {
         image: canvas.toDataURL("image/png"),
@@ -135,7 +135,7 @@ export default function Home() {
           setVariables((prev) => ({ ...prev, [data.expr]: data.result }));
         }
   
-        // Format LaTeX expressions correctly
+        
         const latex = `\\(${data.expr} = ${data.result}\\)`;
         setLatexExpressions((prev) => [...prev, latex]);
       });
