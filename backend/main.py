@@ -14,13 +14,13 @@ from contextlib import asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
 
-SERVER_URL = '127.0.0.1'  # or 'localhost'
-PORT = 8000  #
+SERVER_URL = '127.0.0.1' 
+PORT = 8000 
 app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

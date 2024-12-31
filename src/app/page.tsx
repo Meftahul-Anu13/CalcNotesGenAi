@@ -4,7 +4,20 @@ import { useEffect, useRef, useState } from "react";
 import ColorPalette from "@/components/ColorPicker";
 import Toolbar from "@/components/ControlButtons";
 import "./globals.css";
-import axios from 'axios';
+import axios from "axios";
+
+// import Draggable from "react-draggable";
+
+import ChatComponent from "@/components/ChatComponents";
+import ResultComponents from "@/components/ResultComponent";
+
+
+
+interface Response {
+  expr: string;
+  result: string;
+  assign: boolean;
+}
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -13,7 +26,9 @@ export default function Home() {
   const [color, setColor] = useState("white");
   const colors = ["white", "red", "blue", "green", "yellow"];
   const [isErasing, setIsErasing] = useState(false);
-  const [dictOfVars, setDictOfVars] = useState({});
+  const [variables, setVariables] = useState<Record<string, string>>({});
+  // const [latexPosition, setLatexPosition] = useState({ x: 10, y: 200 });
+  const [latexExpressions, setLatexExpressions] = useState<string[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -32,12 +47,7 @@ export default function Home() {
 
     const handleResize = () => {
       if (canvas && context) {
-        const imageData = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         context.putImageData(imageData, 0, 0);
@@ -88,39 +98,52 @@ export default function Home() {
     if (context) {
       if (isErasing) {
         setIsErasing(false);
-        context.lineWidth = 5; 
-        setColor("white"); 
+        context.lineWidth = 5;
+        setColor("white");
       } else {
         setIsErasing(true);
-        context.lineWidth = 5; 
-        setColor("black"); 
+        context.lineWidth = 5;
+        setColor("black");
       }
     }
   };
 
   const runAction = async () => {
     if (!canvasRef.current) return;
-
-    // Convert canvas content to Base64
+  
     const canvas = canvasRef.current;
-    if (canvas) {
-      
-        if (canvas) {
-          const response = await axios({
-              method: 'post',
-              url: `http://127.0.0.1:8000/api`,
-              data: {
-                  image: canvas.toDataURL('image/png'),
-                  dict_of_vars: dictOfVars
-              }
-          });
-          
-
-        const resp = await response.data;
-        console.log('Response:', resp);
-      } 
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api", {
+        image: canvas.toDataURL("image/png"),
+        dict_of_vars: variables,
+      });
+  
+      let respData = response.data;
+  
+      // Convert response to a valid JSON string if necessary
+      if (typeof respData === "string") {
+        respData = respData.replace(/'/g, '"'); // Replace single quotes with double quotes
+        respData = respData.replace(/([0-9.]+)\/([0-9.]+)/g, '"$1/$2"'); // Quote fractional values
+        respData = JSON.parse(respData);
+      }
+  
+      console.log("Sanitized Response:", respData);
+  
+      // Process the response
+      respData.data.forEach((data: Response) => {
+        if (data.assign) {
+          setVariables((prev) => ({ ...prev, [data.expr]: data.result }));
+        }
+  
+        // Format LaTeX expressions correctly
+        const latex = `\\(${data.expr} = ${data.result}\\)`;
+        setLatexExpressions((prev) => [...prev, latex]);
+      });
+    } catch (error) {
+      console.error("Error during API call:", error);
     }
   };
+  
 
   return (
     <main>
@@ -144,7 +167,8 @@ export default function Home() {
           onMouseLeave={stopDrawing}
           style={{ display: "block", cursor: "crosshair" }}
         />
+        <ResultComponents latexExpressions={latexExpressions} onRun={runAction} />
+        <ChatComponent/>
       </div>
-    </main>
-  );
+    </main> );
 }

@@ -7,7 +7,7 @@ interface ToolbarProps {
     isErasing: boolean;
   }
   
-  const Toolbar: React.FC<ToolbarProps> = ({ isErasing, onReset, onToggleEraser, onRun  }) => {
+  const Toolbar: React.FC<ToolbarProps> = ({ isErasing, onReset, onToggleEraser  }) => {
     return (
       <div className="flex gap-4 mb-4">
         <button
@@ -25,12 +25,12 @@ interface ToolbarProps {
       >
         {isErasing ? 'Draw' : 'Erase'}
       </button>
-        <button
+        {/* <button
           onClick={onRun}
           className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-900"
         >
           Run
-        </button>
+        </button> */}
       </div>
     );
   };
